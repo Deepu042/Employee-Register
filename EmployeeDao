@@ -1,0 +1,172 @@
+package com.org.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Scanner;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
+import com.org.dto.Employee;
+
+
+public class EmployeeDao {
+	Scanner sc = new Scanner(System.in);
+
+	public String save(Employee emp) {
+		try
+
+		{
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+
+			PreparedStatement ps = con
+					.prepareStatement("insert into emp(id,name,age,email,password,salary) values(?,?,?,?,?,?) ");
+
+			int id = emp.getId();
+			String name = emp.getName();
+			int age = emp.getAge();
+			String email = emp.getEmail();
+			String password = emp.getPassword();
+			long salary = emp.getSalary();
+
+			ps.setInt(1, id);
+			ps.setString(2, name);
+			ps.setInt(3, age);
+			ps.setString(4, email);
+			ps.setString(5, password);
+			ps.setLong(6, salary);
+			ps.executeUpdate();
+			con.close();
+
+		}
+
+		catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+		return "data has been inserted ";
+
+	}
+	public boolean fetchByEmailAndPassword(String email, String password) {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con1 = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+			PreparedStatement pst = con1.prepareStatement("select * from emp where email =?");
+			pst.setString(1, email);
+			ResultSet rst = pst.executeQuery();
+			if (rst.next()) {
+				String dbpassword = rst.getString("password");
+				if (dbpassword.equals(password)) {
+					System.out.println("LOGIN SUCCESSFULLY");
+				} else {
+					System.out.println("invalid password credentials");
+				}
+			} else {
+				System.out.println("invalid  email");
+			}
+			con1.close();
+
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+
+	}
+
+	public List<Employee> fetchAll(Employee emp) {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+			PreparedStatement ps = con.prepareStatement("select * from emp");
+			ResultSet rst = ps.executeQuery();
+			while (rst.next()) {
+				System.out.println("id: " + rst.getInt("id"));
+				System.out.println("name: " + rst.getString("name"));
+				System.out.println("age: " + rst.getInt("age"));
+				System.out.println("email: " + rst.getString("email"));
+				System.out.println("password: " + rst.getString("password"));
+				System.out.println("salary: " + rst.getLong("salary"));
+				System.out.println("------------------------------");
+
+			}
+			con.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public Employee fetchById(int id) {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection con2 = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+			PreparedStatement psft = con2.prepareStatement("select * from emp where id =?");
+			psft.setInt(1, id);
+			ResultSet rst = psft.executeQuery();
+			while (rst.next()) {
+				System.out.println("id:" + rst.getInt("id"));
+				System.out.println("name:" + rst.getString("name"));
+				System.out.println("age:" + rst.getInt("age"));
+				System.out.println("email:" + rst.getString("email"));
+				System.out.println("password:" + rst.getString("password"));
+				System.out.println("salary:" + rst.getLong("salary"));
+
+			}
+			con2.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public boolean deleteById(int id) {
+
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection condt = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+			PreparedStatement psdt = condt.prepareStatement("delete  from emp where id =?");
+			psdt.setInt(1, id);
+			psdt.executeUpdate();
+			condt.close();
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+
+		return true;
+	}
+	public int updateById(int id, Employee emp) {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection conup = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_first_jdbc", "root", "root");
+			PreparedStatement psup = conup
+					.prepareStatement("update  emp set email=?,password=?,salary=? where id=?");
+
+			System.out.print("Enter your new email:");
+			String eemail = sc.next();
+			System.out.print("Enter your new password:");
+			String epassword = sc.next();
+			System.out.println("Enter your new salary");
+			long esalary = sc.nextLong();
+
+			psup.setString(1, eemail);
+			psup.setString(2, epassword);
+			psup.setLong(3, esalary);
+			psup.setInt(4, id);
+			System.out.println("Your data has been modified");
+			psup.executeUpdate();
+			conup.close();
+
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+}
